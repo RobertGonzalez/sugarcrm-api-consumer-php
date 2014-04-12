@@ -2,3 +2,6 @@
 .project
 .settings/
 .idea
+/.settings
+/.idea
+.DS_Store
