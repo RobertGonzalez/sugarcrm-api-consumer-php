@@ -1,7 +1,8 @@
 .externalToolBuilders/
 .project
-.settings/
+.settings
 .idea
 /.settings
 /.idea
 .DS_Store
+cache/
