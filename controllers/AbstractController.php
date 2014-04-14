@@ -114,10 +114,10 @@ abstract class AbstractController
                 break;
             }
         }
-        
+
         $this->moduleSingular = $this->getModuleSingular();
     }
-    
+
     protected function getModuleSingular()
     {
         $singularList = $this->getAppListString('moduleListSingular');
@@ -223,7 +223,7 @@ abstract class AbstractController
      * The action for handling record lists
      */
     public function listAction() {
-        $this->headings = $this->_config->default_list_headings;
+        $this->headings = $this->getListHeadings();
 
         $rows = array();
         if ($this->module) {
@@ -250,8 +250,6 @@ abstract class AbstractController
         $this->bean = $bean;
 
         $obj = $this->_getApi()->getMetadataObject($this->platform);
-        //$data = $obj->getMetadataForModule($this->module);
-        //$this->metadata = $data[$this->module]['views']['record']['meta'];
         $this->metadata = $obj->getModuleFieldsForView($this->module, 'record');
     }
 
@@ -392,16 +390,39 @@ abstract class AbstractController
 
         return $this->api;
     }
-    
+
     public function getModuleString($string)
     {
         $obj = $this->_getApi()->getLanguageObject($this->language, $this->platform);
         return $obj->getModuleString($this->module, $string, $string);
     }
-    
+
     public function getAppListString($string)
     {
         $obj = $this->_getApi()->getLanguageObject($this->language, $this->platform);
         return $obj->getAppListString($string, array());
+    }
+
+    /**
+     * Gets list view columns from the list metadata. This will parse the labels
+     * for each field as part of the process.
+     *
+     * @return array
+     */
+    protected function getListHeadings()
+    {
+        $obj = $this->_getApi()->getMetadataObject($this->platform);
+        $fields = $obj->getModuleFieldsForView($this->module, 'list');
+
+        if (empty($fields)) {
+            $headings = $this->_config->default_list_headings;
+        } else {
+            $headings = array();
+            foreach ($fields as $name => $def) {
+                $headings[$name] = $this->getModuleString($def['vname']);
+            }
+        }
+
+        return $headings;
     }
 }

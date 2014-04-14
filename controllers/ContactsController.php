@@ -1,11 +1,10 @@
 <?php
 class ContactsController extends AbstractController {
     public function listAction() {
-        $this->headings = array(
-            'link_name' => 'Name',
-            'location' => 'Location',
-            'has_image' => 'Picture?',
-        );
+        $headings = $this->getListHeadings();
+        $headings['location'] = 'Location';
+        $headings['has_image'] = 'Picture?';
+        $this->headings = $headings;
 
         $res = $this->_getApi()->getList($this->module);
         $rows = array();
@@ -13,7 +12,7 @@ class ContactsController extends AbstractController {
             $row['has_image'] = !empty($row['picture']) ? 'Y' : '';
             $row['location'] = $row['primary_address_city'] . ', ' . $row['primary_address_state'];
             $row['detail'] = '?action=detail&id=' . $row['id'];
-            $row['link_name'] = '<a href="' . $row['detail'] . '">' . $row['full_name'] . '</a>';
+            $row['name'] = '<a href="' . $row['detail'] . '">' . $row['full_name'] . '</a>';
             $rows[] = $row;
         }
 
