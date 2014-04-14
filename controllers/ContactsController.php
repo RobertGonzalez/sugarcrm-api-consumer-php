@@ -1,22 +1,31 @@
 <?php
 class ContactsController extends AbstractController {
-    public function listAction() {
-        $headings = $this->getListHeadings();
-        $headings['location'] = 'Location';
-        $headings['has_image'] = 'Picture?';
-        $this->headings = $headings;
-
-        $res = $this->_getApi()->getList($this->module);
+    protected function getListRows($data)
+    {
         $rows = array();
-        foreach ($res as $row) {
+        foreach ($data as $row) {
             $row['has_image'] = !empty($row['picture']) ? 'Y' : '';
             $row['location'] = $row['primary_address_city'] . ', ' . $row['primary_address_state'];
             $row['detail'] = '?action=detail&id=' . $row['id'];
-            $row['name'] = '<a href="' . $row['detail'] . '">' . $row['full_name'] . '</a>';
+            $row['full_name'] = '<a href="' . $row['detail'] . '">' . $row['full_name'] . '</a>';
             $rows[] = $row;
         }
 
-        $this->rows = $rows;
+        return $rows;
+    }
+
+    /**
+     * Gets list view columns from the list metadata. This will parse the labels
+     * for each field as part of the process.
+     *
+     * @return array
+     */
+    protected function getListHeadings()
+    {
+        $headings = parent::getListHeadings();
+        $headings['location'] = 'Location';
+        $headings['has_image'] = 'Picture?';
+        return $headings;
     }
 
     public function detailAction() {
