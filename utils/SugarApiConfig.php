@@ -44,23 +44,9 @@ class SugarApiConfig
      */
     public function load($withOverride = true)
     {
-        // Grab the known expected config
-        if (file_exists('config.php')) {
-            require_once 'config.php';
-            if (isset($config)) {
-                $this->config = array_merge($this->config, $config);
-            }
-        }
-
-        // Grab the override if there is one, in similar fashion to SugarCRM proper
-        if (file_exists('config_override.php')) {
-            // Trash the old config we just got
-            unset($config);
-            require_once 'config_override.php';
-            if (isset($config)) {
-                $this->config = array_merge($this->config, $config);
-            }
-        }
+        $configs = $this->getConfigs();
+        $configs = array_merge($configs['config'], $configs['override']);
+        $this->config = array_merge($this->config, $configs);
     }
 
     /**
@@ -94,5 +80,48 @@ class SugarApiConfig
     public function __get($name)
     {
         return $this->get($name);
+    }
+
+    /**
+     * Overloaded setter, sets a name/value pair into the configuration array
+     *
+     * @param string $name The name of the config entry
+     * @param mixed $value The value of the config entry
+     */
+    public function __set($name, $value)
+    {
+        $this->set($name, $value);
+    }
+
+    /**
+     * Gets config arrays from the core config file and the override if there is
+     * one
+     *
+     * @return array
+     */
+    protected function getConfigs()
+    {
+        // Default the return to something reasonable
+        $return = array('config' => array(), 'override' => array());
+
+        // Grab the known expected config
+        if (file_exists('config.php')) {
+            require_once 'config.php';
+            if (isset($config)) {
+                $return['config'] = $config;
+            }
+        }
+
+        // Grab the override if there is one, in similar fashion to SugarCRM proper
+        if (file_exists('config_override.php')) {
+            // Trash the old config we just got
+            unset($config);
+            require_once 'config_override.php';
+            if (isset($config)) {
+                $return['override'] = $config;
+            }
+        }
+
+        return $return;
     }
 }

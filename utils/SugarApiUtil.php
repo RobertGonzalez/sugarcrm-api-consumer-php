@@ -105,22 +105,30 @@ class SugarApiUtil
         return $this->_platforms;
     }
 
-    public function getModules() {
+    /**
+     * Gets the list of visible, enabled, displayable modules
+     *
+     * @return array
+     */
+    public function getModules() 
+    {
+        $modules = array();
         if (!empty($_SESSION['authtoken'])) {
-            $metadata = $this->getMetadataObject()->getMetadata('full_module_list');
-            unset($metadata['_hash']);
-            return isset($metadata['full_module_list']) ? $metadata['full_module_list'] : array();
-            /*
-            $get = 'full_module_list';
-            $metadata = $this->getModuleMetadata('', $get);
-            if (isset($metadata[$get])) {
-                unset($metadata[$get]['_hash']);
-                return $metadata[$get];
+            // Gets the modules_info element of the metadata
+            $list = $this->getMetadataObject()->getMetadata('modules_info');
+
+            // Get rid of hashes since we don't need them for this
+            unset($list['_hash'], $list['modules_info']['_hash']);
+
+            // Loop and set to get what we want
+            foreach ($list['modules_info'] as $module => $defs) {
+                if (!empty($defs['enabled']) && !empty($defs['visible']) && !empty($defs['display_tab'])) {
+                    $modules[$module] = $module;
+                }
             }
-            */
         }
 
-        return array();
+        return $modules;
     }
 
     public function getApiUrl() {

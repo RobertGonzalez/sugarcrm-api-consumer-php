@@ -88,10 +88,12 @@ abstract class AbstractController
     public function __construct() {
         // Handle requested pieces of information
         $this->id = empty($_REQUEST['id']) ? '' : $_REQUEST['id'];
-        $this->__set('id', $this->id);
         $this->module = $_SESSION['module'];
         $this->platform = $_SESSION['platform'];
         $this->language = $_SESSION['language'];
+
+        // Set the requested record id into the template
+        $this->__set('id', $this->id);
 
         // Get the config object setup
         $this->_config = SugarApiConfig::getInstance();
@@ -119,6 +121,12 @@ abstract class AbstractController
         $this->moduleSingular = $this->getModuleSingular();
     }
 
+    /**
+     * Gets a singular version of this module name, if it exists, from the app
+     * strings
+     *
+     * @return string
+     */
     protected function getModuleSingular()
     {
         $singularList = $this->getAppListString('moduleListSingular');
@@ -149,11 +157,12 @@ abstract class AbstractController
      * Renders the view for the request
      */
     public function render() {
-        // Handle output
+        // Handle output of the template for this request
         ob_start();
         require_once 'views/' . $this->template . '.php';
         $this->view = ob_get_clean();
 
+        // Handle output of the entire layout now
         ob_start();
         require_once 'layouts/default.php';
         echo ob_get_clean();
@@ -242,7 +251,10 @@ abstract class AbstractController
      * The action for handling record lists
      */
     public function listAction() {
+        // Handle saving of a create/edit first, so it will reflect in the list
         $this->handleSave();
+
+        // Process list now
         $this->headings = $this->getListHeadings();
 
         $rows = array();
@@ -270,7 +282,8 @@ abstract class AbstractController
     }
 
     /**
-     * The action for handling viewing a record
+     * The action for handling viewing a record. It's the same as edit, except
+     * the rendered template is not a form.
      */
     public function detailAction() {
         $this->editAction();
@@ -442,6 +455,12 @@ abstract class AbstractController
         return $headings;
     }
 
+    /**
+     * Handles saving a record. Will attempt to compare old state to new state
+     * on an edit so that it only sends changes. Will send all fields on a create.
+     *
+     * This method sets success and error message where appropriate.
+     */
     protected function handleSave()
     {
         if (isset($_POST['save']) && $_POST['save'] === 'true') {
