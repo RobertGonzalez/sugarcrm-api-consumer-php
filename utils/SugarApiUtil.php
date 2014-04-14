@@ -137,6 +137,11 @@ class SugarApiUtil
         return isset($reply['reply']) ? $reply['reply'] : array();
     }
 
+    public function saveRecord($module, $id, $type, $data) {
+        $reply = $this->call("$module/$id", $data, $type);
+        return isset($reply['reply']) ? $reply['reply'] : array();
+    }
+
     public function getAttachment($module, $id, $field) {
         $record = $this->getRecord($module, $id);
         $reply = $this->call("$module/$id/file/$field");
@@ -422,19 +427,19 @@ class SugarApiUtil
 
         return $this->languageObjects[$platform];
     }
-    
+
     /**
      * Gets a normalized platform name
-     * 
+     *
      * @param string $platform The platform to get a cleaned up value for
      * @return string
      */
-    protected function getNormalizedPlatform($platform) 
+    protected function getNormalizedPlatform($platform)
     {
         if (empty($platform) || !isset($this->_platforms[$platform])) {
             $platform = 'base';
         }
-        
+
         return $platform;
     }
 }

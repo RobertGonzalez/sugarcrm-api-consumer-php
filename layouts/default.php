@@ -78,6 +78,13 @@
             padding: 3px 6px;
             background: #ffe9e8;
         }
+
+        .success {
+            color: #080;
+            border: solid 1px #080;
+            padding: 3px 6px;
+            background: #e9ffe8;
+        }
     </style>
 </head>
 <body>
@@ -99,10 +106,10 @@
     </p>
     <p style="font-size: smaller;">
     <?php if ($this->action == 'list') : ?>
-        <a href="<?php echo $this->formaction ?>?action=edit"><?php echo $this->getModuleString('LNK_CREATE') ?></a> | 
+        <a href="<?php echo $this->formaction ?>?action=edit"><?php echo $this->getModuleString('LNK_CREATE') ?></a> |
         <a href="<?php echo $this->formaction ?>?action=metadata">View metadata for <?php echo $this->module ?></a> |
     <?php elseif ($this->action == 'edit' || $this->action == 'detail') : ?>
-        <a href="<?php echo $this->formaction ?>">&laquo; Back to list</a> | 
+        <a href="<?php echo $this->formaction ?>">&laquo; Back to list</a> |
     <?php endif; ?>
         <a href="<?php echo $this->formaction ?>?action=logout">Logout</a>
     </p>

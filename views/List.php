@@ -1,3 +1,15 @@
+    <?php if ($this->success): ?>
+    <p class="success">
+        <?php echo $this->success ?>
+    </p>
+    <?php endif ?>
+
+    <?php if ($this->error): ?>
+    <p class="error">
+        <?php echo $this->error ?>
+    </p>
+    <?php endif ?>
+
     <table id="list-table">
         <tr>
         <?php foreach ($this->headings as $label) : ?>

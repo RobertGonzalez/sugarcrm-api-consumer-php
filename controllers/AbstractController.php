@@ -88,6 +88,7 @@ abstract class AbstractController
     public function __construct() {
         // Handle requested pieces of information
         $this->id = empty($_REQUEST['id']) ? '' : $_REQUEST['id'];
+        $this->__set('id', $this->id);
         $this->module = $_SESSION['module'];
         $this->platform = $_SESSION['platform'];
         $this->language = $_SESSION['language'];
@@ -220,19 +221,34 @@ abstract class AbstractController
     }
 
     /**
+     * Gets rows for a list view from a data collection from a records call
+     *
+     * @param array $data The result of an API records fetch
+     * @return array
+     */
+    protected function getListRows($data)
+    {
+        $rows = array();
+        foreach ($data as $row) {
+            $row['detail'] = '?action=detail&id=' . $row['id'];
+            $row['link_name'] = '<a href="' . $row['detail'] . '">' . $row['name'] . '</a>';
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
      * The action for handling record lists
      */
     public function listAction() {
+        $this->handleSave();
         $this->headings = $this->getListHeadings();
 
         $rows = array();
         if ($this->module) {
-          $res = $this->_getApi()->getList($this->module);
-          foreach ($res as $row) {
-              $row['detail'] = '?action=detail&id=' . $row['id'];
-              $row['link_name'] = '<a href="' . $row['detail'] . '">' . $row['name'] . '</a>';
-              $rows[] = $row;
-          }
+            $res = $this->_getApi()->getList($this->module);
+            $rows = $this->getListRows($res);
         }
 
         $this->rows = $rows;
@@ -257,7 +273,7 @@ abstract class AbstractController
      * The action for handling viewing a record
      */
     public function detailAction() {
-
+        $this->editAction();
     }
 
     /**
@@ -424,5 +440,53 @@ abstract class AbstractController
         }
 
         return $headings;
+    }
+
+    protected function handleSave()
+    {
+        if (isset($_POST['save']) && $_POST['save'] === 'true') {
+            $obj = $this->_getApi()->getMetadataObject($this->platform);
+            $fields = $obj->getModuleFieldsForView($this->module, 'record');
+            $send = array();
+
+            if ($this->id) {
+                // This is an edit
+                $type = 'PUT';
+                $record = $this->_getRecord(false);
+                foreach ($_POST as $key => $val) {
+                    // Don't need id, as that will be part of the request URL
+                    if ($key === 'id') {
+                        continue;
+                    }
+
+                    // Only send different field values
+                    if (isset($record[$key]) && $record[$key] !== $val) {
+                        $send[$key] = $val;
+                    }
+                }
+            } else {
+                // This is an add
+                $type = 'POST';
+                foreach ($_POST as $key => $val) {
+                    if ($key === 'id') {
+                        continue;
+                    }
+
+                    // Send the entire packet
+                    $send[$key] = $val;
+                }
+            }
+
+            if (!empty($send)) {
+                $res = $this->_getApi()->saveRecord($this->module, $this->id, $type, $send);
+                if (!empty($res)) {
+                    $this->success = 'Record saved!';
+                } else {
+                    $this->error = 'Could not save the record';
+                }
+            } else {
+                $this->success = 'Nothing to save';
+            }
+        }
     }
 }
