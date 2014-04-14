@@ -117,7 +117,7 @@ class SugarApiMetadata
             if (!in_array('en_us', $langs)) {
                 array_unshift($langs, 'en_us');
             }
-            
+
             foreach ($langs as $lang) {
                 $obj = new SugarApiLanguage($lang, $this->platform);
                 $obj->getLanguage();
@@ -191,7 +191,14 @@ class SugarApiMetadata
 
         return $return;
     }
-    
+
+    /**
+     * Gets fields for a module that happen to be on a view
+     *
+     * @param string $module The module to get the view field list for
+     * @param string $view The view to scrape for fields
+     * @return array
+     */
     public function getModuleFieldsForView($module, $view)
     {
         $data = $this->getMetadataForModule($module);
@@ -206,13 +213,13 @@ class SugarApiMetadata
                 } elseif (is_string($pField)) {
                     $fName = $pField;
                 }
-                
+
                 if ($fName && isset($fields[$fName])) {
                     $return[$fName] = $fields[$fName];
                 }
             }
         }
-        
+
         return $return;
     }
 }
