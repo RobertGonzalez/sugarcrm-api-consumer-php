@@ -15,5 +15,3 @@
 
         <?php $ix++; $on = !$on; endforeach; endif; ?>
     </table>
-
-    <pre><?php echo $this->content ?></pre>
