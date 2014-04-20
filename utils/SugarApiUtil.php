@@ -16,6 +16,7 @@ class SugarApiUtil
     protected $metadataObjects = array();
     protected $languageObjects = array();
     private static $_instance = null;
+    private static $_reauthCount = 0;
 
     public static function getInstance() {
         if (null === self::$_instance) {
@@ -39,6 +40,30 @@ class SugarApiUtil
         }
     }
 
+    /**
+     * Redirects the request to another location
+     *
+     * @param string $location The URL of the location to redirect to
+     */
+    public function redirect($location = null) {
+        if (empty($location)) {
+            $location = $this->getFormAction();
+        }
+        header('Location: ' . $location);
+        exit;
+    }
+
+    /**
+     * Gets the form action for the current request. Also useful for redirecting
+     * on failed auth/reauth situations
+     *
+     * @return string
+     */
+    public function getFormAction()
+    {
+        return 'http://' . $_SERVER['HTTP_HOST'] . '/'. $this->_config->site_path;
+    }
+
     public function logout() {
         // Unset all of the session variables.
         $_SESSION = array();
@@ -59,12 +84,16 @@ class SugarApiUtil
 
     protected function _reauth() {
         if (!empty($_SESSION['refreshtoken'])) {
+            if (self::$_reauthCount == 2) {
+                $this->logout();
+                $this->redirect();
+            }
+            self::$_reauthCount++;
             $args = array(
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $_SESSION['refreshtoken'],
                 'client_id' => 'sugar',
                 'client_secret' => '',
-                //'platform' => isset($_SESSION['platform']) ? strtolower($_SESSION['platform']) : 'base',
             );
 
             $oldtoken = $_SESSION['authtoken'];
@@ -110,7 +139,7 @@ class SugarApiUtil
      *
      * @return array
      */
-    public function getModules() 
+    public function getModules()
     {
         $modules = array();
         if (!empty($_SESSION['authtoken'])) {

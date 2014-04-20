@@ -99,7 +99,7 @@ abstract class AbstractController
         $this->_config = SugarApiConfig::getInstance();
 
         // Builds the form action used in postbacks
-        $this->formaction = 'http://' . $_SERVER['HTTP_HOST'] . '/'. $this->_config->site_path;
+        $this->formaction = $this->_getApi()->getFormAction();
 
         // Gets certain lists
         $this->modules = $this->_getApi()->getModules();
@@ -107,18 +107,27 @@ abstract class AbstractController
 
         // Get a default module if one isn't selected, but make sure it isn't home
         if (empty($this->module)) {
-            $modules = array_keys($this->modules);
-            foreach ($modules as $module) {
-                if ($module == 'Home') {
-                    continue;
-                }
-
-                $this->module = $module;
-                break;
-            }
+            $this->module = $this->getDefaultModule();
         }
 
         $this->moduleSingular = $this->getModuleSingular();
+    }
+
+    /**
+     * Gets a default module from the first module in the modules list that is
+     * not 'Home'
+     *
+     * @return string
+     */
+    protected function getDefaultModule()
+    {
+        foreach (array('Accounts', 'Contacts', 'Leads') as $module) {
+            if (isset($this->modules[$module])) {
+                return $module;
+            }
+        }
+
+        return '';
     }
 
     /**
@@ -355,11 +364,7 @@ abstract class AbstractController
      * @param string $location The URL of the location to redirect to
      */
     protected function _redirect($location = null) {
-        if (empty($location)) {
-            $location = $this->formaction;
-        }
-        header('Location: ' . $location);
-        exit;
+        $this->_getApi()->redirect($location);
     }
 
     /**

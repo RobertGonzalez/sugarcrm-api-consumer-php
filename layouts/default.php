@@ -89,7 +89,7 @@
 </head>
 <body>
     <h1>Robert's Sekret Sugar Storehouse (S<sup>3</sup>)<?php if ($this->module): ?> - <?php echo $this->module ?><?php endif; ?></h1>
-    <?php if (!empty($_SESSION['authtoken'])): ?>
+    <?php if (!empty($_SESSION['authtoken']) && $this->module !== 'Help'): ?>
     <form method="post" action="<?php echo $this->formaction ?>">
     <p>
         Select a module: <select name="module" id="module">
@@ -104,6 +104,7 @@
         </select> &nbsp;&nbsp;
         <input type="submit" name="submit" id="submit" value="Go..." />
     </p>
+
     <p style="font-size: smaller;">
     <?php if ($this->action == 'list') : ?>
         <a href="<?php echo $this->formaction ?>?action=edit"><?php echo $this->getModuleString('LNK_CREATE') ?></a> |
@@ -111,10 +112,11 @@
     <?php elseif ($this->action == 'edit' || $this->action == 'detail') : ?>
         <a href="<?php echo $this->formaction ?>">&laquo; Back to list</a> |
     <?php endif; ?>
+        <a href="<?php echo $this->formaction ?>?module=Help&from=<?php echo $this->module ?>">View help</a> | 
         <a href="<?php echo $this->formaction ?>?action=logout">Logout</a>
     </p>
-        <?php endif; ?>
     </form>
+    <?php endif; ?>
     <?php echo $this->view ?>
 </body>
 </html>

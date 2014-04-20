@@ -124,4 +124,62 @@ class SugarApiConfig
 
         return $return;
     }
+
+    /**
+     * Saves changes made to existing configs to the override file
+     *
+     * Will only add newly set values or changes to existing values
+     *
+     * @return boolean
+     */
+    public function save()
+    {
+        // Holds the changes/additions
+        $changed = array();
+
+        // Gets the current collection of configs from the config files
+        $configs = $this->getConfigs();
+
+        // All current configs as one large collection
+        $all = array_merge($configs['config'], $configs['override']);
+
+        // See if there are new values in the config array that need to be handled
+        $newKeys = array_diff_key($this->config, $all);
+        foreach ($newKeys as $key) {
+            $changed[$key] = $this->config[$key];
+        }
+
+        // Now check and see if any of the current array are different from the
+        // base and custom
+        foreach ($configs as $config) {
+            $changed = array_merge($changed, $this->getChangedValues($config));
+        }
+
+        if ($changed) {
+            $write = '';
+            foreach ($changed as $key => $value) {
+                $write .= "\$config['$key'] = " . var_export($value) . ";\n";
+            }
+            return file_put_contents('config_override.php', $write);
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets differences between the current config and the $config passed in
+     *
+     * @param array $config A config collection to check diffs on
+     * @return array
+     */
+    protected function getChangedValues(array $config)
+    {
+        $diff = array();
+        foreach ($this->config as $key => $value) {
+            if (!isset($config[$key]) || $config[$key] !== $value) {
+                $diff[$key] = $value;
+            }
+        }
+        return $diff;
+    }
 }
