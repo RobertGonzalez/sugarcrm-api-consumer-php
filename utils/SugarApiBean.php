@@ -34,6 +34,17 @@ class SugarApiBean
     }
 
     /**
+     * Checks existence of a property of the bean
+     *
+     * @param string $name The property to check set on
+     * @return boolean
+     */
+    public function __isset($name)
+    {
+        return array_key_exists($name, $this->vars);
+    }
+
+    /**
      * Simple loader that takes a result from an API call and reads it into this
      * object
      *

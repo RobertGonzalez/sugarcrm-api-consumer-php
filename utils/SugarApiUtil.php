@@ -224,18 +224,28 @@ class SugarApiUtil
 
     public function postRecordAttachment($module, $id, $field, $filepath) {
         // Work on this file now
-        $post = array($field => '@' . realpath('.') . '/' . basename($filepath), 'noJSON' => true);
+        //$post = array($field => '@' . realpath('.') . '/' . basename($filepath), 'noJSON' => true);
+        $post = array($field => new CURLFile(realpath('.') . '/' . basename($filepath)), 'noJSON' => true);
         $reply = $this->call("$module/$id/file/$field", $post);
         return !empty($reply['reply'][$field]['name']);
     }
 
-    public function putRecordAttachment($module, $id, $field, $filepath) {
+    public function putRecordAttachment($module, $id, $field, $filepath, $encode = false) {
         //$filedata = base64_encode(file_get_contents($filepath));
         //$params = json_encode(array('filename' => basename($filepath), 'filecontents' => $filedata, 'filesize' => filesize($filepath)));
         //$reply = $this->_getReply("$module/$id/file/$field", $params, 'PUT');
         $opts = array(CURLOPT_INFILESIZE => filesize($filepath), CURLOPT_INFILE => fopen($filepath, 'r'));
-        $headers = array(/*'Content-Type: image/png', */'filename: ' . basename($filepath));
-        $reply = $this->call("$module/$id/file/$field", '', 'PUT', $opts, $headers);
+        $headers = array(
+            /*'Content-Type: image/png', */
+            'filename: ' . basename($filepath),
+        );
+        if ($encode) {
+            $args['content_transfer_encoding'] = 'base64';
+        } else {
+            $args = '';
+        }
+
+        $reply = $this->call("$module/$id/file/$field", $args, 'PUT', $opts, $headers);
 
         return !empty($reply['reply'][$field]['name']);
     }

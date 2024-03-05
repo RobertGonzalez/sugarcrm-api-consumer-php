@@ -6,9 +6,9 @@
             </p>
             <?php endif ?>
             <p><a href="<?php echo $this->formaction ?>?action=edit&id=<?php echo $this->id ?>" />Edit</a></p>
-            <?php foreach ($this->metadata as $field => $def): ?>
+            <?php foreach ($this->metadata as $field => $def): if ($this->renderField($field)): ?>
             <p>
                 <strong><?php echo $this->getModuleString($def['vname']) ?></strong> <?php echo $this->bean->$field ?>
             </p>
-            <?php endforeach; ?>
+            <?php endif; endforeach; ?>
         </fieldset>

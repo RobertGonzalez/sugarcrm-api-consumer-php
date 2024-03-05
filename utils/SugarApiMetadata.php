@@ -193,6 +193,29 @@ class SugarApiMetadata
     }
 
     /**
+     * Gets required fields of a module
+     *
+     * @param string $module The name of the module to get the fields for
+     * @param boolean $required Only get fields that are required fields
+     * @return array
+     */
+    public function getModuleFields($module, $required = true)
+    {
+        $data = $this->getMetadataForModule($module);
+        $fields = $data[$module]['fields'];
+        unset($fields['_hash']);
+        $return = array();
+        foreach ($fields as $name => $def) {
+            $file = isset($def['type']) && $def['type'] === 'file';
+            $reqd = $required === false || !empty($def['required']);
+            if ($file || $reqd) {
+                $return[$name] = $def;
+            }
+        }
+        return $return;
+    }
+
+    /**
      * Gets fields for a module that happen to be on a view
      *
      * @param string $module The module to get the view field list for

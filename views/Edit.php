@@ -8,13 +8,14 @@
             <?php endif ?>
             <input type="hidden" name="save" value="true" />
             <input type="hidden" name="id" value="<?php echo $this->id ?>" />
-            <?php foreach ($this->metadata as $field => $def): ?>
+            <?php foreach ($this->metadata as $field => $def): if ($this->renderField($field)): ?>
             <p>
                 <?php echo $this->getModuleString($def['vname']) ?><br /> <input type="text" name="<?php echo $field ?>" id="<?php echo $field ?>" value="<?php echo $this->bean->$field ?>" />
             </p>
-            <?php endforeach; ?>
+            <?php endif; endforeach; ?>
             <p>
                 <input type="submit" name="submit" value="Save" />
             </p>
         </fieldset>
     </form>
+    <pre><?php var_dump($this->metadata) ?></pre>

@@ -85,6 +85,15 @@ abstract class AbstractController
      */
     protected $_config;
 
+    /**
+     * Array of field names for a module to NOT show when rendering
+     *
+     * @var array
+     */
+    protected $blacklist = array(
+        'edit' => array('id', 'team_count', 'team_name'),
+    );
+
     public function __construct() {
         // Handle requested pieces of information
         $this->id = empty($_REQUEST['id']) ? '' : $_REQUEST['id'];
@@ -160,6 +169,31 @@ abstract class AbstractController
      */
     public function __get($var) {
         return array_key_exists($var, $this->_vars) ? $this->_vars[$var] : null;
+    }
+
+    protected function renderField($field) {
+        return !isset($this->blacklist[$this->action]) || !in_array($field, $this->blacklist[$this->action]);
+    }
+
+    /**
+     * Renders a list view field
+     *
+     * @param mixed $field The field value to render
+     * @return string
+     */
+    public function renderListField($field) {
+        $out = '';
+        if (is_scalar($field)) {
+            $out .= $field;
+        } else {
+            if (is_array($field)) {
+                foreach ($field as $k => $v) {
+                    $out .= "$k: $v\n";
+                }
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -279,15 +313,20 @@ abstract class AbstractController
      * The action for handling editing of a record and creating a record
      */
     public function editAction() {
+        $this->setBean();
+
+        $obj = $this->_getApi()->getMetadataObject($this->platform);
+        //$this->metadata = $obj->getModuleFieldsForView($this->module, 'record');
+        $this->metadata = $obj->getModuleFields($this->module);
+    }
+
+    protected function setBean() {
         $bean = new SugarApiBean;
         if ($this->id) {
             $res = $this->_getApi()->getRecord($this->module, $this->id);
             $bean->loadFromArray($res);
         }
         $this->bean = $bean;
-
-        $obj = $this->_getApi()->getMetadataObject($this->platform);
-        $this->metadata = $obj->getModuleFieldsForView($this->module, 'record');
     }
 
     /**
@@ -378,7 +417,8 @@ abstract class AbstractController
                 if (move_uploaded_file($_FILES[$field]['tmp_name'], $newfile)) {
                     $record = $this->_getApi()->getRecord($this->module, $this->id);
                     if (!empty($record[$field])) {
-                        $success = $this->_getApi()->putRecordAttachment($this->module, $this->id, $field, $newfile);
+                        $endcode = !empty($_REQUEST['encode']);
+                        $success = $this->_getApi()->putRecordAttachment($this->module, $this->id, $field, $newfile, $encode);
                     } else {
                         $success = $this->_getApi()->postRecordAttachment($this->module, $this->id, $field, $newfile);
                     }

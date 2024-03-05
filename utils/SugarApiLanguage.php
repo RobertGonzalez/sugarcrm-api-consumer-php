@@ -126,7 +126,9 @@ class SugarApiLanguage
     {
         $data = $this->getLanguageFromCache();
 
-        if (empty($data)) {
+        if (empty($data) || isset($data['error'])) {
+            unset($data);
+            $data['status'] = 'Fetching language from the server';
             $api = SugarApiUtil::getInstance();
             $reply = $api->call("lang/{$this->lang}?platform={$this->platform}");
             if (!empty($reply['reply'])) {
